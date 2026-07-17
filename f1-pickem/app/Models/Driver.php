@@ -6,18 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Driver extends Model
 {
-    // The columns in your NEW f1db2 schema
-    protected $fillable = ['id', 'name', 'team', 'number', 'year'];
+    protected $fillable = ['id', 'name', 'team', 'number', 'year', 'primary_color', 'secondary_color'];
 
-    public function getPath()
+    public function getPath(): string
     {
         return route('private.image', [
-            'year' => $this->year,
+            'year'     => $this->year,
             'filename' => $this->getFileName(),
         ]);
     }
 
-    public function getFileName()
+    public function getFileName(): string
     {
         return 'f1_' . $this->number . '.png';
     }

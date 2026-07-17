@@ -2,62 +2,101 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pick;
 use App\Services\PickemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Pick;
-use App\Http\Controllers\Race;
 
 class PickController extends Controller
 {
-    public function __construct(private PickemService $service)
-    {
-        // Authentication is handled by route middleware.
-    }
+    public function __construct(private PickemService $service) {}
 
-    public function index(Request $request)
+    // ── GET /next-race/submit ────────────────────────────────────────────────
+    public function showSubmit()
     {
-        $sessionKey = $request->query('sessionKey') ?: $this->service->getSessionKey();
-        $year = $this->service->getYear($sessionKey);
-        $races = $this->service->getSessionRaces($sessionKey);
-        $mainRace = $this->service->getMainRace($sessionKey);
-        $contestants = $this->service->getContestants($year);
+        $sessionKey  = $this->service->getSessionKey();
+        $year        = $this->service->getYear($sessionKey);
+        $race        = $this->service->getRace($sessionKey);
+        $drivers     = $this->service->getDrivers($year);
+        $races       = $this->service->getSessionRaces($sessionKey);
+        $currentPick = Auth::user()->getPicks($sessionKey);
 
-        $bonus = 1.0;
-        $race = $mainRace;
+        // Already submitted — go straight to results
+        if ($currentPick) {
+            return redirect()->route('next-race');
+        }
+
+        // Bonus tier (based on which session hasn't started yet)
+        $bonus        = 1.0;
+        $bonusLabel   = 'NO BONUS';
+        $bonusDisplay = '+0%';
+        $bonusColor   = '#888888';
+
+        $tiers = [
+            ['mult' => 1.50, 'label' => 'EARLY BIRD', 'display' => '+50%', 'color' => '#22c55e'],
+            ['mult' => 1.25, 'label' => 'EARLY',       'display' => '+25%', 'color' => '#86efac'],
+            ['mult' => 1.10, 'label' => 'BONUS',        'display' => '+10%', 'color' => '#fbbf24'],
+            ['mult' => 1.00, 'label' => 'NO BONUS',     'display' => '+0%',  'color' => '#888888'],
+            ['mult' => 0.50, 'label' => 'LATE PENALTY', 'display' => '-50%', 'color' => '#E10600'],
+        ];
+
         if ($races->isNotEmpty()) {
             $now = now('US/Central');
             foreach ($races as $index => $sessionRace) {
                 if ($now->lt($sessionRace->date_start)) {
-                    $bonuses = [1.50, 1.25, 1.10, 1.00, 0.50];
-                    $bonus = $bonuses[$index] ?? 1.0;
+                    $tier         = $tiers[$index] ?? $tiers[3];
+                    $bonus        = $tier['mult'];
+                    $bonusLabel   = $tier['label'];
+                    $bonusDisplay = $tier['display'];
+                    $bonusColor   = $tier['color'];
                     break;
                 }
             }
         }
 
-        $sessionKey = (int) $sessionKey;
-        $lastPlace = $this->service->getContestants($year)->last()?->number ?: 20;
-
-        return view('picks.set', compact('sessionKey', 'year', 'races', 'mainRace', 'contestants', 'bonus', 'picks', 'lastPlace'));
+        return view('next-race.submit', compact(
+            'race', 'drivers', 'bonus', 'bonusLabel', 'bonusDisplay', 'bonusColor',
+            'sessionKey', 'year'
+        ));
     }
 
+    // ── GET /next-race ───────────────────────────────────────────────────────
+    public function showResult()
+    {
+        $sessionKey  = $this->service->getSessionKey();
+        $year        = $this->service->getYear($sessionKey);
+        $race        = $this->service->getRace($sessionKey);
+        $currentPick = Auth::user()->getPicks($sessionKey);
+
+        // Not submitted yet — redirect to the form
+        if (! $currentPick) {
+            return redirect()->route('next-race.submit');
+        }
+
+        $picks = $this->service->getPicks($sessionKey);
+
+        return view('next-race.index', compact(
+            'race', 'picks', 'currentPick', 'sessionKey', 'year'
+        ));
+    }
+
+    // ── POST /submit-picks ───────────────────────────────────────────────────
     public function submit(Request $request)
     {
-        $bettor = $request->input('bettor');
-        $payload = json_decode($bettor, true);
+        $payload = json_decode($request->input('bettor'), true);
 
         if (! is_array($payload) || empty($payload['bets']) || count($payload['bets']) !== 3) {
-            return response()->json(['error' => 'Invalid payload'], 422);
+            return back()->withErrors(['error' => 'Invalid payload']);
         }
 
         $bets = array_map('intval', $payload['bets']);
         if (in_array(0, $bets, true)) {
-            return response()->json(['error' => 'Missing bets'], 422);
+            return back()->withErrors(['error' => 'Missing bets']);
         }
 
         $sessionKey = $this->service->getSessionKey();
-        $pick = Pick::updateOrCreate(
+
+        Pick::updateOrCreate(
             ['user_id' => Auth::id(), 'session_key' => $sessionKey],
             [
                 'd1_id' => $bets[0],
@@ -68,39 +107,8 @@ class PickController extends Controller
             ]
         );
 
-        $this->service->recalculateScores($sessionKey);
+        $this->service->updateScores($sessionKey);
 
-        return response()->json(['status' => 'Successfully added new entry']);
-    }
-
-    public function view(Request $request)
-    {
-        $sessionKey = 3006;//$this->service->getSessionKey(); // The true session key for the upcoming weekend
-        $year = $this->service->getYear((int) $sessionKey);
-        $picks = $this->service->getPicks($sessionKey);
-        $winners = $this->service->getWinners($sessionKey);
-        $players = $this->service->getPlayers($sessionKey);
-        $correctBets = $this->service->getCorrectBets($winners, $players);
-        // $selectedSessionKey = $this->service->getSessionKey(); // The session key that defines the view
-        $selectedSessionKey = $request->query('sessionKey') ?: $sessionKey; // The session key that defines the view
-        $race = $this->service->getRace($sessionKey);
-        // $standings = $this->service->getTotalsForYear(intdiv($sessionKey, 1000) * 1000);
-        // $sessionList = $this->service->getSessionKeysForYear($sessionKey);
-
-        $selectedLatestSessionKey = $this->service->getLatestSessionKey($selectedSessionKey);
-        $selectedFirstSessionKey = intdiv($selectedSessionKey, 1000) * 1000 + 1;
-        $sessionList = $selectedLatestSessionKey > $selectedFirstSessionKey ? range($selectedFirstSessionKey, $selectedLatestSessionKey) : [$selectedFirstSessionKey];
-        // $currentPick = Pick::where('user_id', Auth::id())
-        //     ->where('session_key', $sessionKey)
-        //     ->first();
-        $status = 'picked';//$currentPick ? 'picked' : 'unpicked';
-        $message = "";
-        // if ($sessionKey !== $currentSessionKey) {
-        //     $status = 'history';
-        // }
-
-        $lastPlace = $this->service->getDrivers($year)->last()?->position ?: 20;
-
-        return view('picks.view', compact('sessionKey', 'selectedSessionKey', 'sessionList', 'year', 'picks', 'players', 'race', 'winners', 'correctBets', 'players', 'status', 'message', 'lastPlace'));
+        return redirect()->route('next-race');
     }
 }

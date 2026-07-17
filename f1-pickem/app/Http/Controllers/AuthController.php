@@ -12,7 +12,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('picks.view');
+            return redirect()->route('home');
         }
 
         return view('auth.login');
@@ -38,7 +38,7 @@ class AuthController extends Controller
             }
 
             Auth::login($user);
-            return redirect()->route('picks.view');
+            return redirect()->route('home');
         }
 
         return redirect()->route('login')->withErrors(['username' => 'Invalid username or password.']);
@@ -47,7 +47,6 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-
         return redirect()->route('login')->with('status', 'You have been logged out.');
     }
 }

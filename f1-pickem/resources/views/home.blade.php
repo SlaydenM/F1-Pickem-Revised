@@ -1,16 +1,20 @@
-<x-layout>
-    <x-slot:title>
-        Welcome
-    </x-slot:title>
-    <div class="max-w-2xl mx-auto">
-        <div class="card bg-base-100 shadow mt-8">
-            <div class="card-body">
-                <div>
-                    <h1 class="text-3xl font-bold">Welcome to Chirper!</h1>
-                    <p class="mt-4 text-base-content/60">This is your brand new Laravel application. Time to make it
-                        sing (or chirp)!</p>
-                </div>
-            </div>
+@extends('layouts.app')
+
+@section('content')
+<div class="min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="grid gap-6 items-start" style="grid-template-columns:1fr 380px">
+
+            {{-- LEFT: Season Standings --}}
+            <x-player-standings :players="$players" :year="$year" :round="$round" />
+
+            {{-- RIGHT: Action Centre --}}
+            <section class="flex flex-col gap-4">
+                <x-next-race-card type="dashboard" :race="$race" />
+                <x-my-season-card :myRank="$myRank" :myScore="$myScore" :round="$round" />
+                <x-submit-prompt-card :submitted="(bool) $currentPick" :race="$race" />
+            </section>
         </div>
     </div>
-</x-layout>
+</div>
+@endsection
