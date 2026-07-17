@@ -37,6 +37,8 @@ CREATE TABLE `drivers` (
   `year` int NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `primary_color` varchar(7) COLLATE utf8mb4_unicode_ci DEFAULT '#000000',
+  `secondary_color` varchar(7) COLLATE utf8mb4_unicode_ci DEFAULT '#000000',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -115,9 +117,9 @@ CREATE TABLE `picks` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
   `score` float NOT NULL,
-  `d1_id` bigint unsigned NOT NULL,
-  `d2_id` bigint unsigned NOT NULL,
-  `d3_id` bigint unsigned NOT NULL,
+  `d1_id` bigint unsigned DEFAULT NULL,
+  `d2_id` bigint unsigned DEFAULT NULL,
+  `d3_id` bigint unsigned DEFAULT NULL,
   `bonus` double NOT NULL,
   `session_key` int NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -127,9 +129,9 @@ CREATE TABLE `picks` (
   KEY `picks_d1_id_foreign` (`d1_id`),
   KEY `picks_d2_id_foreign` (`d2_id`),
   KEY `picks_d3_id_foreign` (`d3_id`),
-  CONSTRAINT `picks_d1_id_foreign` FOREIGN KEY (`d1_id`) REFERENCES `drivers` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `picks_d2_id_foreign` FOREIGN KEY (`d2_id`) REFERENCES `drivers` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `picks_d3_id_foreign` FOREIGN KEY (`d3_id`) REFERENCES `drivers` (`id`) ON DELETE RESTRICT,
+  CONSTRAINT `picks_d1_id_foreign` FOREIGN KEY (`d1_id`) REFERENCES `drivers` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `picks_d2_id_foreign` FOREIGN KEY (`d2_id`) REFERENCES `drivers` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `picks_d3_id_foreign` FOREIGN KEY (`d3_id`) REFERENCES `drivers` (`id`) ON DELETE SET NULL,
   CONSTRAINT `picks_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -183,15 +185,14 @@ DROP TABLE IF EXISTS `winners`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `winners` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `team` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `number` int NOT NULL,
+  `driver_id` bigint unsigned DEFAULT NULL,
   `position` int NOT NULL,
   `session_key` int NOT NULL,
-  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `winners_driver_id_foreign` (`driver_id`),
+  CONSTRAINT `winners_driver_id_foreign` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

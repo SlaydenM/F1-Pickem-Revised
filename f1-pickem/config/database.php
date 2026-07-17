@@ -64,6 +64,16 @@ return [
             ]) : [],
         ],
 
+        'mysql_legacy' => [
+            'driver' => 'mysql',
+            'host' => env('DB_LEGACY_HOST', '127.0.0.1'), // Your Windows IP
+            'port' => env('DB_LEGACY_PORT', '3306'),
+            'database' => env('DB_LEGACY_DATABASE', 'f1db'),
+            'username' => env('DB_LEGACY_USERNAME', 'root'),
+            'password' => env('DB_LEGACY_PASSWORD', ''),
+            // ... (copy the same charset/collation settings as above)
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
