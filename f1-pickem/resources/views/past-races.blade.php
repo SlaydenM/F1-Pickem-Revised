@@ -2,23 +2,23 @@
 
 @section('content')
 <div class="min-h-screen">
-    <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
 
         {{-- Page header + year dropdown --}}
         <div class="flex items-center gap-4 mb-6">
-            <div class="w-1 h-10 bg-[#E10600]"></div>
-            <h1 class="font-['Barlow_Condensed'] font-black italic text-4xl text-white tracking-tight uppercase">
+            <div class="w-1 h-10 bg-[#E10600] flex-shrink-0"></div>
+            <h1 class="font-['Barlow_Condensed'] font-black italic text-3xl md:text-4xl text-white tracking-tight uppercase">
                 Past Races
             </h1>
 
             {{-- Year selector --}}
             <div class="relative ml-auto" id="year-dropdown">
                 <button onclick="document.getElementById('year-menu').classList.toggle('hidden')"
-                        class="flex items-center gap-3 bg-[#232323] px-10 py-2
+                        class="flex items-center gap-2 md:gap-3 bg-[#232323] px-4 md:px-10 py-2
                                font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-sm text-white
-                               hover:border-white/20 transition-all cursor-pointer"
+                               hover:border-white/20 transition-all cursor-pointer whitespace-nowrap"
                         style="clip-path:polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)">
-                    {{ $year }} Season
+                    {{ $year }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"/>
@@ -37,18 +37,19 @@
             </div>
         </div>
 
-        {{-- Round tabs --}}
+        {{-- Round tabs — horizontal scroll on mobile --}}
         @if($racesForYear->isNotEmpty())
-            <div class="flex gap-2 flex-wrap mb-6">
+            <div class="flex gap-2 overflow-x-auto pb-1 mb-6 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
                 @foreach($racesForYear as $r)
                     @php $rnd = $r->session_key % 1000; @endphp
                     <a href="{{ route('past-races', ['sessionKey' => $r->session_key]) }}"
-                       class="font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-xs px-10 py-2 transition-all duration-150
+                       class="flex-shrink-0 font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-xs px-4 md:px-10 py-2 transition-all duration-150
                               {{ $r->session_key == $sessionKey
                                     ? 'bg-[#E10600] text-white'
                                     : 'bg-[#232323] text-[#BBBBBB] hover:text-white hover:bg-[#2a2a2a]' }}"
                        style="clip-path:polygon(0% 0%,calc(100% - 10px) 0%,100% 50%,calc(100% - 10px) 100%, 0% 100%, 10px 50%)">
-                        R{{ $rnd }} · {{ Str::before($r->name, ' Grand Prix') ?: $r->name }}
+                        R{{ $rnd }}
+                        <span class="hidden md:inline">· {{ Str::before($r->name, ' Grand Prix') ?: $r->name }}</span>
                     </a>
                 @endforeach
             </div>
@@ -58,16 +59,13 @@
         @if($race)
             <x-next-race-card type="results" :race="$race" />
 
-            {{-- Two-column layout --}}
-            <div class="grid grid-cols-2 gap-6">
-                {{-- Left: Player predictions --}}
+            {{-- Mobile: single column. Desktop: two-column grid --}}
+            <div class="flex flex-col md:grid md:grid-cols-2 gap-6">
                 <x-picks-list
                     type="results"
                     :picks="$picks"
                     :correctBets="$correctBets"
                 />
-
-                {{-- Right: Official classification --}}
                 <x-driver-standings :winners="$winners" />
             </div>
 
@@ -86,7 +84,6 @@
 
 @push('scripts')
 <script>
-// Close year dropdown on outside click
 document.addEventListener('click', function(e) {
     var dd = document.getElementById('year-dropdown');
     if (dd && !dd.contains(e.target)) {
