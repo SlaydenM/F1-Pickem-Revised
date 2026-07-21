@@ -11,7 +11,7 @@
             ['val' => max(0, $round - 1),             'label' => 'RACES'],
         ] as $stat)
             <div class="bg-[#141414] p-3 text-center" style="border-radius:2px">
-                <div class="font-['Barlow_Condensed'] font-black italic text-[#E10600] text-2xl leading-none">
+                <div class="font-['Barlow_Condensed'] font-black italic text-[#E10600] text-4xl leading-none">
                     {{ $stat['val'] }}
                 </div>
                 <div class="font-['JetBrains_Mono'] text-[#BBBBBB] text-[9px] tracking-widest mt-1">

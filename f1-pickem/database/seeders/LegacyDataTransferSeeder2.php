@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Driver;
 use App\Models\Pick;
 use App\Models\Winner;
+use App\Models\Race;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,6 +16,7 @@ class LegacyDataTransferSeeder2 extends Seeder
 {
     public function run()
     {
+        /*
         $this->command->info('Starting legacy data transfer...');
 
         // 1. TRANSFER USERS & CREATE ID MAPPING
@@ -170,7 +172,20 @@ class LegacyDataTransferSeeder2 extends Seeder
                 'position' => $resultRow->position, // Array index 0 = 1st place, etc.
                 'session_key' => $resultRow->sessionKey ?? 1,
             ]);
+        }*/
+
+        // Races
+        $oldRaces = DB::connection('mysql_legacy')->table('races')->get();
+
+        foreach ($oldRaces as $oldRace) {
+            Race::create([
+                'session_key' => $oldRace->sessionKey,
+                'date_start'  => $oldRace->dateStart,
+                'name'        => $oldRace->name,
+                'type'        => $oldRace->type
+            ]);
         }
+
         $this->command->info('Winners transferred successfully. ETL Complete!');
     }
 }

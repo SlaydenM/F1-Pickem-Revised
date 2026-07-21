@@ -73,7 +73,7 @@
                 @foreach ($contestants as $driver)
                     <div class="driver-wrapper">
                         <div class="draggable driver-data widget" id="{{ $driver->number }}" data-number="{{ $driver->number }}">
-                            <img class="logo" src="{{ route('private.image', ['year' => $year, 'filename' => 'f1_' . $driver->number . '.png']) }}" alt="{{ $driver->name }}" />
+                            <img class="logo" src="{{ asset($driver->getPath()) }}" alt="{{ $driver->name }}" />
                             <div class="driver-tooltip-wrapper">
                                 <img src="{{ asset('images/tooltip.png') }}" alt="info" />
                                 <span class="widget driver-tooltip-plate">
@@ -109,7 +109,7 @@
                 @if (! $contestants->contains('number', 100))
                     <div class="driver-wrapper">
                         <div class="draggable driver-data driver-data-extra widget" id="100" data-number="100">
-                            <img class="logo" src="{{ route('private.image', ['year' => $year, 'filename' => 'f1_100.png']) }}" alt="Extra Driver" />
+                            <img class="logo" src="{{ route('logos', ['year' => $year, 'filename' => 'f1_100.png']) }}" alt="Extra Driver" />
                             <div class="driver-tooltip-wrapper">
                                 <img src="{{ asset('images/tooltip.png') }}" alt="info" />
                                 <span class="widget driver-tooltip-plate">

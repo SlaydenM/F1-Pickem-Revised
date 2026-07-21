@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>F1 Pick'em</title>
+    <link rel="icon" type="image/png" href="{{ asset('f1pickem-logo-square.PNG') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700;1,800;1,900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -15,7 +16,7 @@
 
     {{-- Fixed gradient background --}}
     <div class="fixed -z-10 pointer-events-none" style="top:0;left:0;width:100vw;height:100vw;">
-        <img src="{{ asset('bg.svg') }}" alt="" class="w-full" style="object-fit:fill;" draggable="false">
+        <img src="{{ asset('slanted-gradient-3.svg') }}" alt="" class="w-full" style="object-fit:fill;" draggable="false">
     </div>
 
     {{-- Nav (authenticated pages only) --}}
@@ -25,10 +26,10 @@
         <div class="max-w-7xl mx-auto h-full flex items-center px-6" style="background:#000000;">
 
             {{-- Logo --}}
-            <div class="mr-auto flex-shrink-0">
-                <span class="font-['Barlow_Condensed'] font-black italic text-white text-2xl tracking-wider uppercase">
-                    F1 Pick'em
-                </span>
+            <div class="mr-auto flex-shrink-0 h-full flex items-center">
+                <img src="{{ asset('f1pickem-logo-wide.PNG') }}"
+                     alt="F1 Pick'em"
+                     class="h-full w-auto object-contain">
             </div>
 
             {{-- Navigation tabs --}}
@@ -50,7 +51,12 @@
                             <div class="absolute inset-x-0 bottom-0 h-[3px] bg-[#E10600]"
                                  style="clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)"></div>
                         @endif
-                        <span class="relative">{{ $tab['label'] }}</span>
+                        <span class="relative">
+                            {{ $tab['label'] }}
+                            {{-- @if( $tab['label'] === 'Next Race' && !$currentPick)
+                                <span class="ml-1.5 inline-block w-2 h-2 rounded-full bg-yellow animate-pulse">!</span>
+                            @endif --}}
+                        </span>
                     </a>
                 @endforeach
             </nav>

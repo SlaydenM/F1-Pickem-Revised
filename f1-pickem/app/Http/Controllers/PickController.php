@@ -41,7 +41,7 @@ class PickController extends Controller
         ];
 
         if ($races->isNotEmpty()) {
-            $now = now('US/Central');
+            $now = now('America/Chicago');
             foreach ($races as $index => $sessionRace) {
                 if ($now->lt($sessionRace->date_start)) {
                     $tier         = $tiers[$index] ?? $tiers[3];
@@ -53,10 +53,12 @@ class PickController extends Controller
                 }
             }
         }
+        
+        $numPicks = $this->service->getPicks($sessionKey)->count();
 
         return view('next-race.submit', compact(
             'race', 'drivers', 'bonus', 'bonusLabel', 'bonusDisplay', 'bonusColor',
-            'sessionKey', 'year'
+            'sessionKey', 'year', 'numPicks'
         ));
     }
 

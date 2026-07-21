@@ -23,23 +23,23 @@ $h = round($w * 2 / 3);
          style="width:{{ $w }}px;height:{{ $h }}px;border-radius:2px;
                 background:#1e1e1e;border:1px solid rgba(255,255,255,0.08)">
 
-        {{-- Driver image (served via PrivateImageController) --}}
-        <img src="{{ $driver->getPath() }}"
+        {{-- Driver image --}}
+        <img src="{{ asset($driver->getPath()) }}"
              alt="{{ $driver->name }}"
              class="w-full h-full object-cover object-top driver-img"
              draggable="false"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
 
         {{-- Text fallback shown when image fails --}}
-        <div class="w-full h-full flex-col justify-between p-2"
+        <div class="w-full h-full justify-between p-2"
              style="display:none;border-left:3px solid {{ $driver->primary_color }}">
-            <span class="font-['JetBrains_Mono'] font-bold text-xs"
-                  style="color:{{ $driver->primary_color }}">#{{ $driver->number }}</span>
+            {{-- <span class="font-['JetBrains_Mono'] font-bold text-xs"
+                  style="color:{{ $driver->primary_color }}">#{{ $driver->number }}</span> --}}
             <div>
-                <div class="font-['Barlow_Condensed'] font-black italic text-white text-sm leading-tight">
+                <div class="font-['Barlow_Condensed'] font-black italic text-white text-xl leading-tight">
                     {{ $driver->name }}
                 </div>
-                <div class="font-['Inter'] text-[10px] text-white/50 uppercase tracking-wider">
+                <div class="font-['Inter'] text-sm text-white/50 uppercase tracking-wider">
                     {{ $driver->team }}
                 </div>
             </div>

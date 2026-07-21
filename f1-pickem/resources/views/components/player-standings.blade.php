@@ -1,16 +1,11 @@
-@props(['players', 'year', 'round'])
-
-@php
-    // Dummy trend data — connect to backend later
-    $dummyTrends = [0, 2, -1, 0, 1, -1, 0, 0, 1, -1];
-@endphp
+@props(['players', 'rankChanges', 'year', 'round'])
 
 <section>
     {{-- Section header --}}
     <div class="flex items-center gap-4 mb-5">
-        <div class="w-1 h-8 bg-[#E10600]"></div>
+            <div class="w-1 h-10 bg-[#E10600]"></div>
         <div>
-            <h1 class="font-['Barlow_Condensed'] font-black italic text-3xl text-white tracking-tight uppercase leading-none">
+            <h1 class="font-['Barlow_Condensed'] font-black italic text-4xl text-white tracking-tight uppercase leading-none">
                 Season Standings
             </h1>
             <div class="font-['JetBrains_Mono'] text-[#BBBBBB] text-[10px] tracking-wider mt-0.5">
@@ -33,9 +28,10 @@
             @php
                 $rank   = $index + 1;
                 $isMe   = $player->id === auth()->id();
-                $bg     = $isMe ? '#1f0500' : ($index % 2 === 0 ? '#232323' : '#1c1c1c');
-                $border = $isMe ? 'rgba(225,6,0,0.4)' : 'rgba(255,255,255,0.06)';
-                $trend  = $dummyTrends[$index] ?? 0;
+                $bg     = $isMe ? '#000000' : ($index % 2 === 0 ? '#232323' : '#1c1c1c');
+                $border = $isMe ? 'rgba(225,6,0,0.6)' : 'rgba(255,255,255,0.06)';
+                $trend  = $rankChanges[$player->id] ?? 0;
+                // dd(count($rankChanges), $rankChanges, $player->id, $trend);
 
                 $rankColor = match($rank) {
                     1       => '#FFD700',
@@ -47,7 +43,7 @@
             <div class="flex items-center gap-5 px-4 py-3"
                  style="clip-path:polygon(16px 0%,100% 0%,calc(100% - 16px) 100%,0% 100%);
                         background:{{ $bg }};
-                        border-bottom:1px solid {{ $border }}">
+                        border-bottom:2px solid {{ $border }}">
 
                 {{-- Rank number --}}
                 <div class="font-['Barlow_Condensed'] font-black italic text-3xl w-8 text-center leading-none flex-shrink-0"
@@ -73,11 +69,11 @@
                 </div>
 
                 {{-- Points --}}
-                <div class="font-['JetBrains_Mono'] font-bold text-sm tabular-nums flex-shrink-0 text-right w-12 mr-5">
+                <div class="font-['JetBrains_Mono'] font-bold text-sm flex-shrink-0 text-right flex items-baseline w-12 mr-5">
                     <span style="color:{{ $isMe ? '#E10600' : '#BBBBBB' }}">
                         {{ number_format($player->total_score, 1) }}
                     </span>
-                    <span class="text-[7px] text-[#BBBBBB] tracking-wider pl-1">PTS</span>
+                    <span class="text-[9px] text-[#BBBBBB] tracking-wider pl-1">PTS</span>
                 </div>
             </div>
         @endforeach

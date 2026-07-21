@@ -59,9 +59,12 @@ class PickemService
 
     public function getPlayers(int $year): Collection
     {
-        $players = User::with(['picks' => function ($query) use ($year) {
-            $startKey = ($year - 2023) * 1000;
-            $endKey   = $startKey + 999;
+        $startKey = ($year - 2023) * 1000;
+        $endKey   = $startKey + 999;
+
+        $players = User::whereHas('picks', function ($query) use ($startKey, $endKey) {
+            $query->whereBetween('session_key', [$startKey, $endKey]);
+        })->with(['picks' => function ($query) use ($startKey, $endKey) {
             $query->whereBetween('session_key', [$startKey, $endKey]);
         }])->get();
 
@@ -76,6 +79,60 @@ class PickemService
         return Pick::with('user', 'd1', 'd2', 'd3')
             ->where('session_key', $sessionKey)
             ->get();
+    }
+
+    public function getRankChanges(int $sessionKey, Collection $players): array
+    {
+        if ($sessionKey % 1000 == 0) {
+            return [];
+        }
+
+        // 1. Current year standings
+        // Using ->values() resets the keys to 0, 1, 2... establishing the actual rank
+        $totalStandings = $players
+            ->sortByDesc('total_score')
+            ->values()
+            ->map(function ($player) {
+                return [
+                    'id'    => $player->id,
+                    'score' => $player->total_score,
+                ];
+            });
+
+        // Fetch the picks for the week you are subtracting
+        $latestPicks = $this->getPicks($sessionKey - 1); 
+
+        // 2. Previous standings
+        // Map over $totalStandings to ensure ALL players are included, even if they missed a pick
+        $prevStandings = $totalStandings
+            ->map(function ($player) use ($latestPicks) {
+                $pick = $latestPicks->firstWhere('user_id', $player['id']);
+                $sessionScore = $pick ? $pick->score : 0;
+                
+                return [
+                    'id'    => $player['id'],
+                    'score' => max(0, $player['score'] - $sessionScore), // Prevent negative scores
+                ];
+            })
+            ->sortByDesc('score')
+            ->values(); // Reset keys again to establish the previous ranks
+
+        // 3. Subtract current and previous standings to get the diff
+        $diff = $totalStandings->mapWithKeys(function ($player, $key) use ($prevStandings) {
+            // Because of ->values() earlier, $key + 1 represents the true current rank
+            $currRank = $key + 1; 
+            
+            $prevRankIndex = $prevStandings->search(fn ($p) => $p['id'] === $player['id']);
+            
+            // Safely check if false before doing math
+            $prevRank = $prevRankIndex !== false ? $prevRankIndex + 1 : $currRank; 
+            
+            return [
+                $player['id'] => $prevRank - $currRank
+            ];
+        });
+
+        return $diff->toArray();
     }
 
     public function getWinners(int $sessionKey): Collection

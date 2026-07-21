@@ -10,10 +10,11 @@ class Driver extends Model
 
     public function getPath(): string
     {
-        return route('private.image', [
-            'year'     => $this->year,
-            'filename' => $this->getFileName(),
-        ]);
+        return "driver_logos/{$this->year}/" . $this->getFileName();
+        // return route('logos', [
+        //     'year'     => $this->year,
+        //     'filename' => $this->getFileName(),
+        // ]);
     }
 
     public function getFileName(): string

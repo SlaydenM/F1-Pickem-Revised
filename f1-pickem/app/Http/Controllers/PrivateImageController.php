@@ -8,15 +8,16 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PrivateImageController extends Controller
 {
-    public function show($year, $filename): BinaryFileResponse
+    public function show($year, $filename)
     {
-        $path = "private/driver_logos/{$year}/{$filename}";
+        $path = "driver_logos/{$year}/{$filename}";
 
-        if (!Storage::exists($path)) {
-            abort(404);
-        }
+        return asset($path);
+        // if (!Storage::exists($path)) {
+        //     abort(404);
+        // }
 
-        return Storage::response($path);
+        // return Storage::response($path);
 
         // $path = Storage::disk('local')->path($relativePath);
 

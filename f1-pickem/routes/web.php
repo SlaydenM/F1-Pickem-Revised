@@ -19,5 +19,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/submit-picks', [PickController::class, 'submit'])->name('submit-picks');
     Route::get('/past-races', [PastRacesController::class, 'index'])->name('past-races');
     Route::get('/rules', [RulesController::class, 'index'])->name('rules');
-    Route::get('/logos/{year}/{filename}', [PrivateImageController::class, 'show'])->name('private.image');
+    // Route::get('/logos/{year}/{filename}', [PrivateImageController::class, 'show'])->name('logos');
 });

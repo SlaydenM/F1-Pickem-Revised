@@ -6,7 +6,7 @@
         <div class="grid gap-6 items-start" style="grid-template-columns:1fr 380px">
 
             {{-- LEFT: Season Standings --}}
-            <x-player-standings :players="$players" :year="$year" :round="$round" />
+            <x-player-standings :players="$players" :rankChanges="$rankChanges" :year="$year" :round="$round" />
 
             {{-- RIGHT: Action Centre --}}
             <section class="flex flex-col gap-4">

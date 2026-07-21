@@ -14,10 +14,10 @@
             {{-- Year selector --}}
             <div class="relative ml-auto" id="year-dropdown">
                 <button onclick="document.getElementById('year-menu').classList.toggle('hidden')"
-                        class="flex items-center gap-3 bg-[#232323] border border-white/[0.08] px-4 py-2
+                        class="flex items-center gap-3 bg-[#232323] px-10 py-2
                                font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-sm text-white
                                hover:border-white/20 transition-all cursor-pointer"
-                        style="clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)">
+                        style="clip-path:polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)">
                     {{ $year }} Season
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -43,11 +43,11 @@
                 @foreach($racesForYear as $r)
                     @php $rnd = $r->session_key % 1000; @endphp
                     <a href="{{ route('past-races', ['sessionKey' => $r->session_key]) }}"
-                       class="font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-xs px-4 py-2 transition-all duration-150
+                       class="font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-xs px-10 py-2 transition-all duration-150
                               {{ $r->session_key == $sessionKey
                                     ? 'bg-[#E10600] text-white'
                                     : 'bg-[#232323] text-[#BBBBBB] hover:text-white hover:bg-[#2a2a2a]' }}"
-                       style="clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)">
+                       style="clip-path:polygon(0% 0%,calc(100% - 10px) 0%,100% 50%,calc(100% - 10px) 100%, 0% 100%, 10px 50%)">
                         R{{ $rnd }} · {{ Str::before($r->name, ' Grand Prix') ?: $r->name }}
                     </a>
                 @endforeach
