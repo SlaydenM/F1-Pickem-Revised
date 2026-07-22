@@ -40,7 +40,7 @@
                     default => '#BBBBBB',
                 };
             @endphp
-            <div class="flex items-center gap-5 px-4 py-3"
+            <div class="flex items-center gap-5 px-4 py-3 justify-between"
                  style="clip-path:polygon(16px 0%,100% 0%,calc(100% - 16px) 100%,0% 100%);
                         background:{{ $bg }};
                         border-bottom:2px solid {{ $border }}">
@@ -50,7 +50,7 @@
                      style="color:{{ $rankColor }}">{{ $rank }}</div>
 
                 {{-- Player name --}}
-                <div class="flex-1 min-w-0">
+                <div class="flex min-w-0 items-center">
                     <span class="font-['Barlow_Condensed'] font-bold uppercase tracking-wide text-base {{ $isMe ? 'text-white' : 'text-[#BBBBBB]' }}">
                         {{ $player->name }}
                     </span>
@@ -59,7 +59,7 @@
                     @endif
                 </div>
 
-                {{-- Trend indicator (dummy) --}}
+                {{-- Trend indicator --}}
                 <div class="w-8 text-center flex-shrink-0">
                     @if($trend > 0)
                         <span class="font-['JetBrains_Mono'] text-xs text-green-400">▲{{ $trend }}</span>

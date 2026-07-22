@@ -1,15 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen">
-    <div class="max-w-7xl mx-auto px-6 py-8">
+<div class="min-h-screen" id="drag-container">
+    <div class="max-w-7xl mx-auto px-2 py-4">
 
         {{-- Race banner --}}
         <x-next-race-card type="countdown" :race="$race" />
 
         {{-- Section title --}}
-        
-        <div class="flex items-center gap-4 mb-5">
+        <div class="flex flex-row items-start gap-3 mb-5 sm:items-center sm:gap-4">
             <div class="w-1 h-10 bg-[#E10600]"></div>
             <div>
                 <h1 class="font-['Barlow_Condensed'] font-black italic text-4xl text-white tracking-tight uppercase leading-none">
@@ -34,84 +33,71 @@
             </div>
         @endif
 
-        {{-- Hidden store of pre-rendered card markup for JS cloning --}}
-        <div id="driver-store" class="hidden" aria-hidden="true">
-            @foreach($drivers as $driver)
-                <div data-store-id="{{ $driver->id }}"
-                     data-name="{{ $driver->name }}"
-                     data-team="{{ $driver->team }}"
-                     data-number="{{ $driver->number }}"
-                     data-color="{{ $driver->primary_color }}"
-                     data-img="{{ $driver->getPath() }}">
-                    <x-driver-card :driver="$driver" size="md" />
-                </div>
-            @endforeach
-        </div>
-
         {{-- Picks form --}}
-        <form id="picks-form" method="POST" action="{{ route('submit-picks') }}">
-            @csrf
-            <input type="hidden" name="bettor" id="bettor-input">
+        <div class="sticky top-20 z-50 transition-all duration-900">
+            <form id="picks-form" method="POST" action="{{ route('submit-picks') }}">
+                @csrf
+                <input type="hidden" name="bettor" id="bettor-input">
 
-            {{-- Bonus + drop zones --}}
-            <div class="relative mb-5 border border-white/[0.08] overflow-hidden"
-                 style="border-radius:2px;background:rgba(15,15,15,0.7)">
+                {{-- Bonus + drop zones --}}
+                <div class="relative mb-5 border border-white/[0.08] overflow-hidden"
+                    style="border-radius:2px;background:rgba(15,15,15,0.97)">
 
-                {{-- Bonus strip --}}
-                <div class="flex items-center justify-between px-5 py-2.5 border-b border-white/[0.07]"
-                     style="background:rgba(0,0,0,0.3)">
-                    <span class="font-['JetBrains_Mono'] text-[#BBBBBB] text-[10px] tracking-widest uppercase">
-                        Submission Bonus
-                    </span>
-                    <div class="flex items-center gap-2">
-                        <div class="font-['Barlow_Condensed'] font-black italic text-base px-3 py-0.5"
-                             style="color:{{ $bonusColor }};background:{{ $bonusColor }}18;
-                                    border:1px solid {{ $bonusColor }}44;border-radius:2px">
-                            {{ $bonusDisplay }}
+                    {{-- Bonus strip --}}
+                    <div class="flex items-center justify-between px-5 py-2.5 border-b border-white/[0.07]"
+                        style="background:rgba(0,0,0,0.3)">
+                        <span class="font-['JetBrains_Mono'] text-[#BBBBBB] text-[10px] tracking-widest uppercase">
+                            Submission Bonus
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <div class="font-['Barlow_Condensed'] font-black italic text-base px-3 py-0.5"
+                                style="color:{{ $bonusColor }};background:{{ $bonusColor }}18;
+                                        border:1px solid {{ $bonusColor }}44;border-radius:2px">
+                                {{ $bonusDisplay }}
+                            </div>
+                            <span class="font-['JetBrains_Mono'] text-[10px] tracking-widest uppercase"
+                                style="color:{{ $bonusColor }}">{{ $bonusLabel }}</span>
                         </div>
-                        <span class="font-['JetBrains_Mono'] text-[10px] tracking-widest uppercase"
-                              style="color:{{ $bonusColor }}">{{ $bonusLabel }}</span>
+                    </div>
+
+                    {{-- Drop zones --}}
+                    <div class="flex flex-row gap-2 py-6 px-4 justify-center">
+                        @foreach([
+                            ['slot' => 'first', 'label' => '1ST PLACE'],
+                            ['slot' => 'tenth', 'label' => '10TH PLACE'],
+                            ['slot' => 'last',  'label' => 'LAST PLACE'],
+                        ] as $zone)
+                            <div class="flex flex-col items-center gap-2 w-full">
+                                <div class="font-['Barlow_Condensed'] font-black italic text-white text-sm uppercase tracking-widest">
+                                    {{ $zone['label'] }}
+                                </div>
+                                <div class="drop-zone w-[150px] h-[100px] max-sm:w-[120px] max-sm:h-[80px]"
+                                    data-slot="{{ $zone['slot'] }}">
+                                    <div class="drop-placeholder w-full h-full flex items-center justify-center
+                                                font-['JetBrains_Mono'] text-[10px] tracking-widest
+                                                border-2 border-dashed border-white/40 text-[#BBBBBB]"
+                                        style="border-radius:2px">· · ·</div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
-                {{-- Drop zones --}}
-                <div class="flex gap-6 justify-center py-6 px-5">
-                    @foreach([
-                        ['slot' => 'first', 'label' => '1ST PLACE'],
-                        ['slot' => 'tenth', 'label' => '10TH PLACE'],
-                        ['slot' => 'last',  'label' => 'LAST PLACE'],
-                    ] as $zone)
-                        <div class="flex flex-col items-center gap-2">
-                            <div class="font-['Barlow_Condensed'] font-black italic text-white text-sm uppercase tracking-widest">
-                                {{ $zone['label'] }}
-                            </div>
-                            <div class="drop-zone"
-                                 data-slot="{{ $zone['slot'] }}"
-                                 style="width:150px;height:100px">
-                                <div class="drop-placeholder w-full h-full flex items-center justify-center
-                                            font-['JetBrains_Mono'] text-[10px] tracking-widest
-                                            border-2 border-dashed border-white/40 text-[#BBBBBB]"
-                                     style="border-radius:2px">· · ·</div>
-                            </div>
-                        </div>
-                    @endforeach
+                {{-- Submit button --}}
+                <div class="flex justify-center mb-6 sm:justify-end">
+                    <button type="submit" id="submit-btn" disabled
+                            class="font-['Barlow_Condensed'] font-black italic uppercase text-lg px-10 py-3
+                                transition-all duration-150 bg-[#232323] text-[#BBBBBB] cursor-not-allowed"
+                            style="clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%)">
+                        🔒 Lock In Picks
+                    </button>
                 </div>
-            </div>
-
-            {{-- Submit button --}}
-            <div class="flex justify-end mb-6">
-                <button type="submit" id="submit-btn" disabled
-                        class="font-['Barlow_Condensed'] font-black italic uppercase text-lg px-10 py-3
-                               transition-all duration-150 bg-[#232323] text-[#BBBBBB] cursor-not-allowed"
-                        style="clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%)">
-                    🔒 Lock In Picks
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
 
         {{-- Driver grid --}}
         <div class="font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-sm text-[#BBBBBB] mb-4">
-            {{ $year }} Driver Grid · drag to predict
+            {{ $year }} Driver Grid · drag to pick
         </div>
         <x-driver-grid :drivers="$drivers" />
     </div>
@@ -119,327 +105,186 @@
 @endsection
 
 @push('scripts')
+{{-- jQuery & jQuery UI Dependencies --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+    html, body { 
+        /* width: 100%; max-width: 100vw;
+        /* overflow-x: hidden; overscroll-behavior: none;  */
+        /* position: relative; */ */
+    }
+    .driver-grid-item > div, .slot-item {
+        touch-action: none !important;
+    }
+</style>
+
 <script>
-(function () {
-    var picks  = { first: null, tenth: null, last: null };
-    var bonus  = {{ $bonus }};
-    var dragging = null; // driver id being dragged
+$(document).ready(function() {
+    var picks = { first: null, tenth: null, last: null };
+    var bonus = {{ $bonus }}; 
 
-    // ── Initialise drag on grid items ────────────────────────────────────────
-    document.querySelectorAll('#driver-grid .driver-grid-item').forEach(function (wrapper) {
-        var card = wrapper.querySelector('[draggable]');
-        if (!card) return;
-        card.addEventListener('dragstart', function (e) {
-            dragging = wrapper.dataset.driverId;
-            e.dataTransfer.effectAllowed = 'move';
-            
-            // ADD THIS LINE: Explicitly set data so the browser registers a valid drag
-            e.dataTransfer.setData('text/plain', dragging); 
-        });
-        card.addEventListener('dragend', function () { dragging = null; });
-    });
+    $('[draggable]').removeAttr('draggable');
 
-    // ── Drop zone behaviour ──────────────────────────────────────────────────
-    document.querySelectorAll('.drop-zone').forEach(function (zone) {
-        zone.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            zone.classList.add('dz-over');
-        });
-        
-        zone.addEventListener('dragleave', function () {
-            zone.classList.remove('dz-over');
-        });
-        
-        zone.addEventListener('drop', function (e) {
-            e.preventDefault();
-            e.stopPropagation(); // 3. IMPORTANT: Stop the global document drop from firing!
-            
-            zone.classList.remove('dz-over');
-            if (!dragging) return;
-            var slot = zone.dataset.slot;
+    // ── 1. Unified Draggable Configuration ─────────────────────────────────────
+    function bindDraggable($el, isSlot) {
+        $el.draggable({
+            helper: 'clone',      
+            revert: 'invalid',    
+            appendTo: 'body',     
+            zIndex: 1000,
+            scroll: false,
+            containment: '#drag-container',
+            start: function(event, ui) {
+                var $this = $(this);
+                // Grab ID based on whether it's coming from a slot or the grid wrapper
+                var driverId = isSlot ? $this.data('driver-id') : $this.closest('.driver-grid-item').data('driver-id');
+                
+                ui.helper
+                    .removeClass('transition-all duration-50 hover:scale-105 hover:z-10')
+                    .css({ transition: 'none', transform: 'none' });
+                
+                ui.helper.data('driver-id', driverId);
+                if (isSlot) ui.helper.data('slot', $this.data('slot'));
 
-            // If driver is already in another slot, clear it from there first
-            for (var s in picks) {
-                if (picks[s] === dragging) { clearSlot(s); break; }
+                // Visual feedback during drag
+                if (isSlot) {
+                    $this.css('opacity', '0.01'); 
+                } else {
+                    dimGridItem(driverId, true);
+                }
+            },
+            stop: function(event, ui) {
+                var $this = $(this);
+                var driverId = isSlot ? $this.data('driver-id') : $this.closest('.driver-grid-item').data('driver-id');
+                
+                if (isSlot) {
+                    $this.css('opacity', '1'); 
+                } else {
+                    // Check if it was successfully placed in a slot. If not, un-dim.
+                    if (!Object.values(picks).includes(driverId)) {
+                        dimGridItem(driverId, false);
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialize all grid items
+    bindDraggable($('.driver-grid-item > div'), false);
+
+    // ── 2. Slot Drop Zone Behaviour ────────────────────────────────────────────
+    $('.drop-zone').droppable({
+        accept: '.driver-grid-item > div, .slot-item',
+        hoverClass: 'dz-over',
+        greedy: true,
+        drop: function(event, ui) {
+            var driverId = ui.helper.data('driver-id');
+            var sourceSlot = ui.helper.data('slot'); // Will exist if dragged from another slot
+            var targetSlot = $(this).data('slot');
+
+            if (!driverId) return;
+
+            // Clean up old slot if moving an item between slots
+            if (sourceSlot && sourceSlot !== targetSlot) {
+                picks[sourceSlot] = null;
+                renderEmptySlot(sourceSlot);
             }
 
-            // If the current slot is already occupied, clear it (returns old driver to grid)
-            if (picks[slot]) {
-                clearSlot(slot);
+            // Un-dim previous driver in the grid if overwriting an existing pick
+            if (picks[targetSlot] && picks[targetSlot] != driverId) {
+                dimGridItem(picks[targetSlot], false);
             }
 
-            picks[slot] = dragging;
-            renderSlot(slot, dragging);
-            dimGridItem(dragging, true);
+            picks[targetSlot] = driverId;
+            renderFilledSlot(targetSlot, driverId);
+            dimGridItem(driverId, true);
             updateBtn();
-            
-            dragging = null; // Reset after successful slot placement
-        });
+        }
     });
 
-    function renderSlot(slot, driverId) {
-        var zone  = document.querySelector('.drop-zone[data-slot="' + slot + '"]');
-        var store = document.querySelector('#driver-store [data-store-id="' + driverId + '"]');
-        if (!zone || !store) return;
-
-        var clone = store.cloneNode(true);
-        clone.style.cursor = 'grab';
-
-        // Wrap clone so it can be dragged back out
-        var dragger = document.createElement('div');
-        dragger.draggable = true;
-        dragger.dataset.driverId = driverId;
-        dragger.appendChild(clone);
-        
-        dragger.addEventListener('dragstart', function (e) {
-            dragging = driverId;
-            e.dataTransfer.effectAllowed = 'move';
-            
-            // ADD THIS LINE: Explicitly set data so the browser registers a valid drag
-            e.dataTransfer.setData('text/plain', driverId);
-            
-            // UX Enhancement: Visually hide the slot item while it's being dragged
-            // We use a timeout so it doesn't disappear before the browser generates the drag image
-            setTimeout(function() { dragger.style.opacity = '0'; }, 0);
-        });
-
-        // 3. Handle dropping the item outside of a valid drop zone
-        dragger.addEventListener('dragend', function (e) {
-            dragger.style.opacity = '1'; // Restore visibility if the drag cancels
-            
-            // A dropEffect of 'none' means the user dropped it outside any valid zone
-            if (e.dataTransfer.dropEffect === 'none') {
+    // ── 3. Document Body Droppable (Remove pick by dragging it out) ────────────
+    $('body').droppable({
+        accept: '.slot-item',
+        drop: function(event, ui) {
+            var slot = ui.helper.data('slot');
+            if (slot) {
                 clearSlot(slot);
                 updateBtn();
             }
-            dragging = null;
-        });
+        }
+    });
 
-        zone.innerHTML = '';
-        zone.appendChild(dragger);
+    // ── 4. UI Helper Functions ─────────────────────────────────────────────────
+    function renderFilledSlot(slot, driverId) {
+        // Clone the clean inner div directly from the desktop grid layout 
+        // This eliminates the need for the hidden #driver-store
+        const isMobile = window.matchMedia("(max-width: 767.98px)").matches;
+        var $pristineCard = $('#driver-grid-' + ((isMobile) ? 'sm' : 'md') + ' .driver-grid-item[data-driver-id="' + driverId + '"] > div').clone();
+        
+        $pristineCard
+            .addClass('slot-item')
+            .data('slot', slot)
+            .data('driver-id', driverId)
+            .css('cursor', 'grab');
+
+        $('.drop-zone[data-slot="' + slot + '"]').empty().append($pristineCard);
+        
+        // Re-bind draggable logic to the newly placed element
+        bindDraggable($pristineCard, true);
     }
 
-    function clearSlot(slot, keepDimmed) {
-        var zone = document.querySelector('.drop-zone[data-slot="' + slot + '"]');
-        if (!zone) return;
-        
+    function clearSlot(slot) {
         var prev = picks[slot];
         picks[slot] = null;
-        
-        if (prev && !keepDimmed) dimGridItem(prev, false); // Undims in the grid
-        
-        zone.innerHTML = '<div class="drop-placeholder w-full h-full flex items-center justify-center ' +
-            'font-mono text-[10px] tracking-widest border-2 border-dashed border-white/40 text-gray-400" ' +
-            'style="border-radius:2px">· · ·</div>';
+        if (prev) dimGridItem(prev, false);
+        renderEmptySlot(slot);
+    }
+
+    function renderEmptySlot(slot) {
+        $('.drop-zone[data-slot="' + slot + '"]').html(
+            '<div class="drop-placeholder w-full h-full flex items-center justify-center font-[\'JetBrains_Mono\'] text-[10px] tracking-widest border-2 border-dashed border-white/40 text-[#BBBBBB]" style="border-radius:2px">· · ·</div>'
+        );
     }
 
     function dimGridItem(driverId, dim) {
-        var item = document.querySelector('#driver-grid [data-driver-id="' + driverId + '"]');
-        if (!item) return;
-        
-        // Walk up to the .driver-grid-item wrapper
-        var wrapper = item.closest('.driver-grid-item') || item;
-        wrapper.style.opacity = dim ? '0.30' : '';
-        wrapper.style.filter  = dim ? 'saturate(0.30)' : '';
+        // Uses a class selector because the ID #driver-grid is duplicated for desktop/mobile views
+        $('.driver-grid-item[data-driver-id="' + driverId + '"]').css({
+            'opacity': dim ? '0.30' : '',
+            'filter': dim ? 'saturate(0.30)' : ''
+        });
     }
 
     function updateBtn() {
-        var btn   = document.getElementById('submit-btn');
         var ready = picks.first && picks.tenth && picks.last;
-        btn.disabled = !ready;
+        var $btn = $('#submit-btn');
+        
+        $btn.prop('disabled', !ready);
+        
         if (ready) {
-            btn.classList.replace('bg-[#232323]', 'bg-[#E10600]');
-            btn.classList.replace('text-[#BBBBBB]', 'text-white');
-            btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
+            $btn.removeClass('bg-[#232323] text-[#BBBBBB] cursor-not-allowed').addClass('bg-[#E10600] text-white cursor-pointer');
         } else {
-            btn.classList.replace('bg-[#E10600]', 'bg-[#232323]');
-            btn.classList.replace('text-white', 'text-[#BBBBBB]');
-            btn.classList.replace('cursor-pointer', 'cursor-not-allowed');
+            $btn.removeClass('bg-[#E10600] text-white cursor-pointer').addClass('bg-[#232323] text-[#BBBBBB] cursor-not-allowed');
         }
     }
 
-    // ── Form submission ───────────────────────────────────────────────────────
-    document.getElementById('picks-form').addEventListener('submit', function (e) {
+    // ── 5. Form Submission ─────────────────────────────────────────────────────
+    $('#picks-form').on('submit', function (e) {
         if (!picks.first || !picks.tenth || !picks.last) { e.preventDefault(); return; }
-        document.getElementById('bettor-input').value = JSON.stringify({
+        $('#bettor-input').val(JSON.stringify({
             bets:  [parseInt(picks.first), parseInt(picks.tenth), parseInt(picks.last)],
             bonus: bonus
-        });
+        }));
     });
-
-    // ── Drop-zone hover styles ────────────────────────────────────────────────
-    var styleEl = document.createElement('style');
-    styleEl.textContent = '.drop-zone.dz-over .drop-placeholder{border-color:#E10600!important;color:#E10600!important;}';
-    document.head.appendChild(styleEl);
-})();
-</script>
-{{-- <script>
-(function () {
-    var picks  = { first: null, tenth: null, last: null };
-    var bonus  = {{ $bonus }};
-    var dragging = null; // driver id being dragged
-
-    // ── Global Drag Behaviour (Prevents 'not-allowed' cursor) ────────────────
     
-    // 1. Make the entire document a valid drop zone to keep the 'move' cursor active
-    document.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        if (e.dataTransfer) {
-            e.dataTransfer.dropEffect = 'move';
-        }
-    });
-
-    // 2. Handle drops anywhere outside the valid slots
-    document.addEventListener('drop', function(e) {
-        e.preventDefault();
-        
-        // If the drop didn't happen inside a valid .drop-zone
-        if (!e.target.closest('.drop-zone') && dragging) {
-            // Find if the dragged driver belongs to a slot and clear it
-            for (var s in picks) {
-                if (picks[s] === dragging) {
-                    clearSlot(s);
-                    updateBtn();
-                    break;
-                }
-            }
-        }
-        dragging = null; // Reset
-    });
-
-    // ── Initialise drag on grid items ────────────────────────────────────────
-    document.querySelectorAll('#driver-grid .driver-grid-item').forEach(function (wrapper) {
-        var card = wrapper.querySelector('[draggable]');
-        if (!card) return;
-        card.addEventListener('dragstart', function (e) {
-            dragging = wrapper.dataset.driverId;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', dragging); 
-            e.dataTransfer.setDragImage(card, card.offsetWidth / 2, card.offsetHeight / 2);
-        });
-        card.addEventListener('dragend', function () { dragging = null; });
-    });
-
-    // ── Drop zone behaviour ──────────────────────────────────────────────────
-    document.querySelectorAll('.drop-zone').forEach(function (zone) {
-        zone.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            zone.classList.add('dz-over');
-        });
-        
-        zone.addEventListener('dragleave', function () {
-            zone.classList.remove('dz-over');
-        });
-        
-        zone.addEventListener('drop', function (e) {
-            e.preventDefault();
-            e.stopPropagation(); // 3. IMPORTANT: Stop the global document drop from firing!
-            
-            zone.classList.remove('dz-over');
-            if (!dragging) return;
-            var slot = zone.dataset.slot;
-
-            // If driver is already in another slot, clear it from there first
-            for (var s in picks) {
-                if (picks[s] === dragging) { clearSlot(s); break; }
-            }
-
-            // If the current slot is already occupied, clear it (returns old driver to grid)
-            if (picks[slot]) {
-                clearSlot(slot);
-            }
-
-            picks[slot] = dragging;
-            renderSlot(slot, dragging);
-            dimGridItem(dragging, true);
-            updateBtn();
-            
-            dragging = null; // Reset after successful slot placement
-        });
-    });
-
-    function renderSlot(slot, driverId) {
-        var zone  = document.querySelector('.drop-zone[data-slot="' + slot + '"]');
-        var store = document.querySelector('#driver-store [data-store-id="' + driverId + '"]');
-        if (!zone || !store) return;
-
-        var clone = store.cloneNode(true);
-        clone.style.cursor = 'grab'; // Reset cursor for the clone
-
-        var dragger = document.createElement('div');
-        dragger.draggable = true;
-        dragger.dataset.driverId = driverId;
-        dragger.appendChild(clone);
-        
-        dragger.addEventListener('dragstart', function (e) {
-            dragging = driverId;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', driverId);
-            e.dataTransfer.setDragImage(dragger, dragger.offsetWidth / 2, dragger.offsetHeight / 2);
-            
-            setTimeout(function() { dragger.style.opacity = '0'; }, 0);
-        });
-
-        // Restore opacity when the drag ends, regardless of where it dropped
-        dragger.addEventListener('dragend', function (e) {
-            dragger.style.opacity = '1';
-        });
-
-        zone.innerHTML = '';
-        zone.appendChild(dragger);
-    }
-
-    function clearSlot(slot, keepDimmed) {
-        var zone = document.querySelector('.drop-zone[data-slot="' + slot + '"]');
-        if (!zone) return;
-        
-        var prev = picks[slot];
-        picks[slot] = null;
-        
-        if (prev && !keepDimmed) dimGridItem(prev, false); 
-        
-        zone.innerHTML = '<div class="drop-placeholder w-full h-full flex items-center justify-center ' +
-            'font-mono text-[10px] tracking-widest border-2 border-dashed border-white/40 text-[#BBBBBB]" ' +
-            'style="border-radius:2px">· · ·</div>';
-    }
-
-    function dimGridItem(driverId, dim) {
-        var item = document.querySelector('#driver-grid [data-driver-id="' + driverId + '"]');
-        if (!item) return;
-        
-        var wrapper = item.closest('.driver-grid-item') || item;
-        wrapper.style.opacity = dim ? '0.30' : '';
-        wrapper.style.filter  = dim ? 'saturate(0.30)' : '';
-    }
-
-    function updateBtn() {
-        var btn   = document.getElementById('submit-btn');
-        var ready = picks.first && picks.tenth && picks.last;
-        btn.disabled = !ready;
-        if (ready) {
-            btn.classList.replace('bg-[#232323]', 'bg-[#E10600]');
-            btn.classList.replace('text-[#BBBBBB]', 'text-white');
-            btn.classList.replace('cursor-not-allowed', 'cursor-pointer');
-        } else {
-            btn.classList.replace('bg-[#E10600]', 'bg-[#232323]');
-            btn.classList.replace('text-white', 'text-[#BBBBBB]');
-            btn.classList.replace('cursor-pointer', 'cursor-not-allowed');
-        }
-    }
-
-    // ── Form submission ───────────────────────────────────────────────────────
-    document.getElementById('picks-form').addEventListener('submit', function (e) {
-        if (!picks.first || !picks.tenth || !picks.last) { e.preventDefault(); return; }
-        document.getElementById('bettor-input').value = JSON.stringify({
-            bets:  [parseInt(picks.first), parseInt(picks.tenth), parseInt(picks.last)],
-            bonus: bonus
-        });
-    });
-
-    // ── Drop-zone hover styles ────────────────────────────────────────────────
-    var styleEl = document.createElement('style');
-    styleEl.textContent = '.drop-zone.dz-over .drop-placeholder{border-color:#E10600!important;color:#E10600!important;}';
-    document.head.appendChild(styleEl);
-})();
-</script> --}}
+    // Inject dynamic CSS for the drop-zone hover
+    $('<style>')
+        .prop('type', 'text/css')
+        .html('.drop-zone.dz-over .drop-placeholder{border-color:#E10600!important;color:#E10600!important;}')
+        .appendTo('head');
+});
+</script>
 @endpush

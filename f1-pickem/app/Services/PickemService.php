@@ -47,10 +47,10 @@ class PickemService
     }
 
     /** Alias used by older controller code */
-    public function getContestants(int $year): Collection
-    {
-        return $this->getDrivers($year);
-    }
+    // public function getContestants(int $year): Collection
+    // {
+    //     return $this->getDrivers($year);
+    // }
 
     public function getPlayer(int $userId): ?User
     {
@@ -174,10 +174,10 @@ class PickemService
     }
 
     /** Alias matching the old controller call */
-    public function recalculateScores(int $sessionKey): void
-    {
-        $this->updateScores($sessionKey);
-    }
+    // public function recalculateScores(int $sessionKey): void
+    // {
+    //     $this->updateScores($sessionKey);
+    // }
 
     public function evaluatePicks(Collection $winners, Collection $players, int $sessionKey): void
     {

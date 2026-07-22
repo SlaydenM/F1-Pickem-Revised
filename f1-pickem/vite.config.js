@@ -10,9 +10,10 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
-    server: {
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
-        },
-    },
+    // server: {
+    //     watch: {
+    //         usePolling: true,
+    //         ignored: ['**/storage/framework/views/**'],
+    //     },
+    // },
 });

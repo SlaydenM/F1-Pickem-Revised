@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="min-h-screen">
-    <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-8">
 
         {{-- Race banner --}}
         <x-next-race-card type="countdown" :race="$race" />
@@ -20,7 +20,7 @@
                     Picks Locked In!
                 </div>
                 <div class="font-['Inter'] text-green-800 text-sm">
-                    Your predictions for {{ $race?->name ?? 'this race' }} are confirmed.
+                    Your picks for {{ $race?->name ?? 'this race' }} are confirmed.
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                 <div class="font-['Barlow_Condensed'] font-bold text-sm uppercase tracking-widest text-[#BBBBBB] mb-3">
                     Your Picks
                 </div>
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     @foreach($mySlots as $slot)
                         <div class="relative bg-[#1c1c1c] border border-white/[0.07] overflow-hidden"
                              style="clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%)">

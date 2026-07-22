@@ -2,17 +2,19 @@
 
 @section('content')
 <div class="min-h-screen">
-    <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-8">
 
         {{-- Page header + year dropdown --}}
-        <div class="flex items-center gap-4 mb-6">
-            <div class="w-1 h-10 bg-[#E10600]"></div>
-            <h1 class="font-['Barlow_Condensed'] font-black italic text-4xl text-white tracking-tight uppercase">
-                Past Races
-            </h1>
+        <div class="flex flex-col gap-3 mb-6 md:flex-row md:items-center md:gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-1 h-10 bg-[#E10600]"></div>
+                <h1 class="font-['Barlow_Condensed'] font-black italic text-3xl text-white tracking-tight uppercase sm:text-4xl">
+                    Past Races
+                </h1>
+            </div>
 
             {{-- Year selector --}}
-            <div class="relative ml-auto" id="year-dropdown">
+            <div class="relative md:ml-auto" id="year-dropdown">
                 <button onclick="document.getElementById('year-menu').classList.toggle('hidden')"
                         class="flex items-center gap-3 bg-[#232323] px-10 py-2
                                font-['Barlow_Condensed'] font-bold uppercase tracking-widest text-sm text-white
@@ -59,7 +61,7 @@
             <x-next-race-card type="results" :race="$race" />
 
             {{-- Two-column layout --}}
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {{-- Left: Player predictions --}}
                 <x-picks-list
                     type="results"
